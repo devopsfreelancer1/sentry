@@ -676,6 +676,18 @@ services:
         BASE_IMAGE: sentry-self-hosted-local
     entrypoint: "/entrypoint.sh"
     command: '"0 0 * * * gosu sentry sentry cleanup --days $SENTRY_EVENT_RETENTION_DAYS"'
+  nginx-reverse-proxy:
+      <<: *restart_policy
+      container_name: nginx-reverse-proxy
+      ports:
+        - "80:80"     # HTTP traffic (if needed)
+        - "443:443"   # HTTPS traffic
+      image: nginx:1.29.1-alpine  # Specify the Nginx image here
+      volumes:
+        - /home/kps/certs:/etc/nginx/certs:ro
+        - ./nginx-reverse-proxy/reverse-proxy.conf:/etc/nginx/conf.d/reverse-proxy.conf
+      depends_on:
+        - nginx
   nginx:
     <<: *restart_policy
     ports:
